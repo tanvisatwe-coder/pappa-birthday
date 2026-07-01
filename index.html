@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Birthday, Pappa</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Georgia, serif;
+      background-color: #fdf6ec;
+      color: #3a2a1e;
+      text-align: center;
+      padding: 40px 20px;
+      margin: 0;
+    }
+
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lock-icon { font-size: 4rem; margin-bottom: 10px; }
+    #login-screen h2 { font-size: 1.8rem; color: #a8552f; margin-bottom: 5px; }
+    #login-screen p { color: #6b5a48; margin-bottom: 25px; }
+
+    #password-input {
+      font-family: Georgia, serif;
+      font-size: 1.3rem;
+      text-align: center;
+      padding: 12px 20px;
+      border: 2px solid #d8c4a0;
+      border-radius: 8px;
+      outline: none;
+      width: 160px;
+      letter-spacing: 4px;
+    }
+    #password-input:focus { border-color: #a8552f; }
+
+    #unlock-btn {
+      font-family: Georgia, serif;
+      font-size: 1.1rem;
+      background-color: #a8552f;
+      color: #fdf6ec;
+      border: none;
+      padding: 12px 28px;
+      margin-left: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #unlock-btn:hover { background-color: #8a431f; }
+
+    #hint { margin-top: 20px; font-size: 0.95rem; color: #a8916f; font-style: italic; }
+    #error-msg { margin-top: 15px; color: #b3261e; font-weight: bold; display: none; }
+
+    .shake { animation: shake 0.4s; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    #countdown-screen {
+      display: none;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #countdown-number {
+      font-size: 8rem;
+      font-weight: bold;
+      color: #a8552f;
+      animation: pop 1s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    #birthday-page { display: none; }
+
+    h1 { font-size: 3rem; color: #a8552f; }
+    .subtitle { font-style: italic; color: #6b5a48; margin-bottom: 30px; }
+
+    .photo-stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .side-photos {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .side-photo {
+      width: 110px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: scale(0.5);
+      animation: popIn 0.6s ease forwards;
+    }
+
+    @keyframes popIn {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .side-photos.left .side-photo:nth-child(1) { animation-delay: 0.5s; }
+    .side-photos.left .side-photo:nth-child(2) { animation-delay: 3.5s; }
+    .side-photos.left .side-photo:nth-child(3) { animation-delay: 6.5s; }
+    .side-photos.left .side-photo:nth-child(4) { animation-delay: 9.5s; }
+
+    .side-photos.right .side-photo:nth-child(1) { animation-delay: 2s; }
+    .side-photos.right .side-photo:nth-child(2) { animation-delay: 5s; }
+    .side-photos.right .side-photo:nth-child(3) { animation-delay: 8s; }
+
+    .cake-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      transform: scale(0.7);
+      animation: cakePop 0.8s ease forwards;
+    }
+
+    @keyframes cakePop {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .cherry {
+      width: 22px; height: 22px;
+      background: radial-gradient(circle at 35% 30%, #e8746b, #b3261e);
+      border-radius: 50%;
+      margin-bottom: -6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .candles {
+      display: flex;
+      gap: 12px;
+      margin-bottom: -6px;
+      z-index: 2;
+      cursor: pointer;
+      padding: 10px;
+    }
+    .candle {
+      width: 6px; height: 28px;
+      background: linear-gradient(#fff, #f2d9a3);
+      border-radius: 2px;
+      position: relative;
+    }
+    .flame {
+      width: 10px; height: 14px;
+      background: radial-gradient(circle, #ffe08a, #f2994a);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      position: absolute;
+      top: -12px; left: -2px;
+      animation: flicker 0.6s infinite alternate;
+      box-shadow: 0 0 8px rgba(242, 153, 74, 0.7);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    @keyframes flicker {
+      from { transform: scale(1) rotate(-2deg); }
+      to { transform: scale(1.15) rotate(2deg); }
+    }
+
+    .flame.extinguished {
+      opacity: 0;
+      transform: scale(0);
+      animation: none;
+    }
+
+    .smoke {
+      position: absolute;
+      top: -14px;
+      left: -1px;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, rgba(180,180,180,0.6), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: smokeRise 1.1s ease-out forwards;
+    }
+
+    @keyframes smokeRise {
+      0% { opacity: 0.8; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-30px) scale(2.2); }
+    }
+
+    .blow-hint {
+      font-size: 0.85rem;
+      color: #a8916f;
+      font-style: italic;
+      margin: 6px 0 14px;
+      transition: opacity 0.4s ease;
+    }
+
+    .blow-hint.hidden { opacity: 0; }
+
+    .wish-message {
+      font-size: 1.2rem;
+      color: #a8552f;
+      font-weight: bold;
+      margin-top: 4px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .wish-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .cake-tier-top {
+      width: 190px; height: 60px;
+      background: #fff2e0;
+      border: 3px solid #a8552f;
+      border-radius: 14px 14px 4px 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem; font-weight: bold; color: #a8552f;
+      font-family: 'Brush Script MT', cursive, Georgia, serif;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cake-tier-top::after {
+      content: '';
+      position: absolute;
+      bottom: -14px;
+      left: 0;
+      width: 100%;
+      height: 16px;
+      background:
+        radial-gradient(circle at 10px 0, transparent 8px, #fff2e0 8.5px) 0 -8px / 20px 16px repeat-x,
+        #fff2e0;
+      border-bottom: 3px solid #a8552f;
+    }
+
+    .cake-tier-bottom {
+      width: 250px; height: 55px;
+      background: #f8e0c4;
+      border: 3px solid #a8552f;
+      border-top: none;
+      border-radius: 0 0 14px 14px;
+      margin-top: 8px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .sprinkle { width: 6px; height: 6px; border-radius: 50%; }
+    .sprinkle:nth-child(1) { background: #a8552f; }
+    .sprinkle:nth-child(2) { background: #e8746b; }
+    .sprinkle:nth-child(3) { background: #6e7f5c; }
+    .sprinkle:nth-child(4) { background: #c08a34; }
+    .sprinkle:nth-child(5) { background: #a8552f; }
+
+    .plate {
+      width: 300px; height: 16px;
+      background: linear-gradient(#e8dcc8, #d8c4a0);
+      border-radius: 50%;
+      margin-top: -3px;
+      box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+    }
+
+    .cake-caption {
+      margin-top: 18px;
+      font-size: 1.5rem;
+      color: #a8552f;
+      font-weight: bold;
+      font-style: italic;
+    }
+
+    .message {
+      max-width: 600px;
+      margin: 20px auto 40px;
+      font-size: 1.2rem;
+      line-height: 1.7;
+      background: #f3e8d6;
+      padding: 30px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .side-photo { width: 80px; height: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="login-screen">
+    <div class="lock-icon">🔒</div>
+    <h2>A Surprise for Pappa</h2>
+    <p>Enter the password to open your birthday surprise</p>
+
+    <div>
+      <input type="password" id="password-input" maxlength="2" placeholder="••">
+      <button id="unlock-btn" onclick="checkPassword()">Unlock</button>
+    </div>
+
+    <p id="error-msg">Oops, that's not it. Try again!</p>
+    <p id="hint">💡 Hint: the password is the age you're turning today, Pappa!</p>
+  </div>
+
+  <div id="countdown-screen">
+    <div id="countdown-number">3</div>
+  </div>
+
+  <div id="birthday-page">
+    <h1>Happy Birthday, Pappa!</h1>
+    <p class="subtitle">Celebrating 45 wonderful years</p>
+
+    <div class="photo-stage">
+
+      <div class="side-photos left">
+        <img class="side-photo" src="images/photo1.jpeg" alt="Pappa memory 1">
+        <img class="side-photo" src="images/photo3.jpeg" alt="Pappa memory 3">
+        <img class="side-photo" src="images/photo5.jpeg" alt="Pappa memory 5">
+        <img class="side-photo" src="images/photo7.jpeg" alt="Pappa memory 7">
+      </div>
+
+      <div class="cake-wrap">
+        <div class="cherry"></div>
+        <div class="candles" id="candles" onclick="blowCandles()">
+          <div class="candle"><div class="flame"></div></div>
+          <div class="candle"><div class="flame"></div></div>
+          <div class="candle"><div class="flame"></div></div>
+        </div>
+        <div class="cake-tier-top">45</div>
+        <div class="cake-tier-bottom">
+          <div class="sprinkle"></div>
+          <div class="sprinkle"></div>
+          <div class="sprinkle"></div>
+          <div class="sprinkle"></div>
+          <div class="sprinkle"></div>
+        </div>
+        <div class="plate"></div>
+        <p class="cake-caption">You are the best father</p>
+        <p class="blow-hint" id="blow-hint">🕯️ Click the candles to blow them out and make a wish!</p>
+        <p class="wish-message" id="wish-message">✨ Wish granted, Pappa! ✨</p>
+      </div>
+
+      <div class="side-photos right">
+        <img class="side-photo" src="images/photo2.jpeg" alt="Pappa memory 2">
+        <img class="side-photo" src="images/photo4.jpeg" alt="Pappa memory 4">
+        <img class="side-photo" src="images/photo6.jpeg" alt="Pappa memory 6">
+      </div>
+
+    </div>
+
+    <p class="message">
+      Happy Birthday, Pappa! 🎉 Thank you for your love, guidance, and constant
+      support. Wishing you good health, happiness, and many more wonderful
+      years ahead. Love you always! ❤️
+    </p>
+  </div>
+
+  <script>
+    function checkPassword() {
+      const input = document.getElementById('password-input');
+      const errorMsg = document.getElementById('error-msg');
+
+      if (input.value === '45') {
+        document.getElementById('login-screen').style.display = 'none';
+        startCountdown();
+      } else {
+        errorMsg.style.display = 'block';
+        input.classList.add('shake');
+        setTimeout(() => input.classList.remove('shake'), 400);
+        input.value = '';
+      }
+    }
+
+    document.getElementById('password-input').addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') checkPassword();
+    });
+
+    function startCountdown() {
+      const countdownScreen = document.getElementById('countdown-screen');
+      const numberEl = document.getElementById('countdown-number');
+      countdownScreen.style.display = 'flex';
+
+      let count = 3;
+      numberEl.textContent = count;
+
+      const interval = setInterval(() => {
+        count--;
+        if (count === 0) {
+          clearInterval(interval);
+          countdownScreen.style.display = 'none';
+          document.getElementById('birthday-page').style.display = 'block';
+        } else {
+          numberEl.style.animation = 'none';
+          numberEl.textContent = count;
+          void numberEl.offsetWidth;
+          numberEl.style.animation = 'pop 1s ease';
+        }
+      }, 1000);
+    }
+
+    let candlesBlown = false;
+
+    function blowCandles() {
+      if (candlesBlown) return;
+      candlesBlown = true;
+
+      const flames = document.querySelectorAll('#candles .flame');
+      const hint = document.getElementById('blow-hint');
+      const wishMsg = document.getElementById('wish-message');
+
+      hint.classList.add('hidden');
+
+      flames.forEach((flame, i) => {
+        setTimeout(() => {
+          const smoke = document.createElement('div');
+          smoke.className = 'smoke';
+          flame.parentElement.appendChild(smoke);
+          setTimeout(() => smoke.remove(), 1200);
+
+          flame.classList.add('extinguished');
+        }, i * 300);
+      });
+
+      setTimeout(() => {
+        wishMsg.classList.add('show');
+      }, flames.length * 300 + 500);
+    }
+  </script>
+
+</body>
+</html>
