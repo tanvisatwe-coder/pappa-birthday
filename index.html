@@ -113,6 +113,13 @@
       opacity: 0;
       transform: scale(0.5);
       animation: popIn 0.6s ease forwards;
+      cursor: zoom-in;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .side-photo:hover {
+      transform: scale(1.06);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.28);
     }
 
     @keyframes popIn {
@@ -128,12 +135,124 @@
     .side-photos.right .side-photo:nth-child(2) { animation-delay: 5s; }
     .side-photos.right .side-photo:nth-child(3) { animation-delay: 8s; }
 
-    .cake-wrap {
+    /* ---------- Cake stage (holds either the gift box or the revealed cake) ---------- */
+
+    .cake-stage {
+      position: relative;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 260px;
+      min-height: 300px;
+    }
+
+    /* ---------- Gift box (swipe to reveal) ---------- */
+
+    .gift-box {
+      width: 260px;
+      height: 300px;
+      background: linear-gradient(160deg, #f8e0c4, #f3e8d6);
+      border: 3px solid #a8552f;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      opacity: 0;
+      transform: scale(0.75);
+      animation: boxAppear 0.7s ease forwards;
+      animation-delay: 10.5s;
+      user-select: none;
+      touch-action: pan-y;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .gift-box:active { cursor: grabbing; }
+
+    @keyframes boxAppear {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .gift-box::before,
+    .gift-box::after {
+      content: '';
+      position: absolute;
+      background: #a8552f;
+    }
+
+    /* vertical ribbon */
+    .gift-box::before {
+      width: 34px;
+      height: 100%;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+    }
+
+    /* horizontal ribbon */
+    .gift-box::after {
+      height: 34px;
+      width: 100%;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+
+    .gift-box-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gift-emoji {
+      font-size: 3.2rem;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+    }
+
+    .swipe-pill {
+      background: #fdf6ec;
+      border: 2px solid #a8552f;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 0.95rem;
+      color: #a8552f;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swipe-arrow {
+      display: inline-block;
+      animation: swipeHint 1.4s ease-in-out infinite;
+    }
+
+    @keyframes swipeHint {
+      0%, 100% { transform: translateX(0); opacity: 0.6; }
+      50% { transform: translateX(8px); opacity: 1; }
+    }
+
+    .gift-box.dragging {
+      transition: none;
+    }
+
+    /* ---------- Cake (unchanged visuals, now revealed after swipe) ---------- */
+
+    .cake-wrap {
+      display: none;
       flex-direction: column;
       align-items: center;
       opacity: 0;
       transform: scale(0.7);
+    }
+
+    .cake-wrap.show {
       animation: cakePop 0.8s ease forwards;
     }
 
@@ -300,6 +419,180 @@
 
     @media (max-width: 720px) {
       .side-photo { width: 80px; height: 80px; }
+      .gift-box { width: 210px; height: 250px; }
+      .gift-emoji { font-size: 2.6rem; }
+    }
+
+    /* ---------- Lightbox ---------- */
+
+    .lightbox-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 12, 6, 0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      cursor: zoom-out;
+      padding: 20px;
+    }
+
+    .lightbox-overlay.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      transform: scale(0.85);
+      transition: transform 0.3s ease;
+    }
+
+    .lightbox-overlay.show .lightbox-img {
+      transform: scale(1);
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 28px;
+      font-size: 2rem;
+      color: #fdf6ec;
+      cursor: pointer;
+      line-height: 1;
+      user-select: none;
+    }
+
+    /* ---------- Confetti ---------- */
+
+    #confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 900;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      border-radius: 2px;
+      animation-name: confettiFall;
+      animation-timing-function: ease-in;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(105vh) rotate(720deg); opacity: 0.9; }
+    }
+
+    /* ---------- Scroll-down hint ---------- */
+
+    .scroll-hint {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(0);
+      background: #a8552f;
+      color: #fdf6ec;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      font-family: Georgia, serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+      z-index: 500;
+    }
+
+    .scroll-hint.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .scroll-hint-arrow {
+      display: inline-block;
+      animation: scrollBounce 1.2s ease-in-out infinite;
+    }
+
+    @keyframes scrollBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    /* ---------- Funny pre-countdown message ---------- */
+
+    .funny-screen {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 30px;
+    }
+
+    .funny-emoji {
+      font-size: 4rem;
+      margin-bottom: 14px;
+      animation: pop 0.8s ease;
+    }
+
+    .funny-text {
+      font-size: 1.6rem;
+      color: #a8552f;
+      font-weight: bold;
+      max-width: 480px;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- Music toggle ---------- */
+
+    .music-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 46px;
+      height: 46px;
+      background: #a8552f;
+      color: #fdf6ec;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.2s ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      z-index: 1100;
+    }
+
+    .music-toggle.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .music-toggle:hover {
+      transform: scale(1.08);
     }
   </style>
 </head>
@@ -316,7 +609,12 @@
     </div>
 
     <p id="error-msg">Oops, that's not it. Try again!</p>
-    <p id="hint">💡 Hint: the password is the age you're turning today, Pappa!</p>
+    <p id="hint">💡 Hint: the password is the age you have completed today, Pappa!</p>
+  </div>
+
+  <div id="funny-screen" class="funny-screen">
+    <div class="funny-emoji" id="funny-emoji">😄</div>
+    <p class="funny-text" id="funny-text"></p>
   </div>
 
   <div id="countdown-screen">
@@ -336,25 +634,36 @@
         <img class="side-photo" src="images/photo7.jpeg" alt="Pappa memory 7">
       </div>
 
-      <div class="cake-wrap">
-        <div class="cherry"></div>
-        <div class="candles" id="candles" onclick="blowCandles()">
-          <div class="candle"><div class="flame"></div></div>
-          <div class="candle"><div class="flame"></div></div>
-          <div class="candle"><div class="flame"></div></div>
+      <div class="cake-stage" id="cake-stage">
+
+        <div class="gift-box" id="gift-box">
+          <div class="gift-box-content">
+            <div class="gift-emoji">🎁</div>
+            <div class="swipe-pill">Swipe to reveal <span class="swipe-arrow">👉</span></div>
+          </div>
         </div>
-        <div class="cake-tier-top">45</div>
-        <div class="cake-tier-bottom">
-          <div class="sprinkle"></div>
-          <div class="sprinkle"></div>
-          <div class="sprinkle"></div>
-          <div class="sprinkle"></div>
-          <div class="sprinkle"></div>
+
+        <div class="cake-wrap" id="cake-wrap">
+          <div class="cherry"></div>
+          <div class="candles" id="candles" onclick="blowCandles()">
+            <div class="candle"><div class="flame"></div></div>
+            <div class="candle"><div class="flame"></div></div>
+            <div class="candle"><div class="flame"></div></div>
+          </div>
+          <div class="cake-tier-top">45</div>
+          <div class="cake-tier-bottom">
+            <div class="sprinkle"></div>
+            <div class="sprinkle"></div>
+            <div class="sprinkle"></div>
+            <div class="sprinkle"></div>
+            <div class="sprinkle"></div>
+          </div>
+          <div class="plate"></div>
+          <p class="cake-caption">You are the best father</p>
+          <p class="blow-hint" id="blow-hint">🕯️ Click the candles to blow them out and make a wish!</p>
+          <p class="wish-message" id="wish-message">✨ Wish granted, Pappa! ✨</p>
         </div>
-        <div class="plate"></div>
-        <p class="cake-caption">You are the best father</p>
-        <p class="blow-hint" id="blow-hint">🕯️ Click the candles to blow them out and make a wish!</p>
-        <p class="wish-message" id="wish-message">✨ Wish granted, Pappa! ✨</p>
+
       </div>
 
       <div class="side-photos right">
@@ -372,6 +681,20 @@
     </p>
   </div>
 
+  <div id="confetti-container"></div>
+
+  <div class="lightbox-overlay" id="lightbox-overlay">
+    <span class="lightbox-close">✕</span>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  </div>
+
+  <div class="scroll-hint" id="scroll-hint">
+    Scroll down for a message <span class="scroll-hint-arrow">⬇</span>
+  </div>
+
+  <audio id="bg-music" src="audio/bg-music.mp3" loop preload="auto"></audio>
+  <div class="music-toggle" id="music-toggle">🔊</div>
+
   <script>
     function checkPassword() {
       const input = document.getElementById('password-input');
@@ -379,7 +702,8 @@
 
       if (input.value === '45') {
         document.getElementById('login-screen').style.display = 'none';
-        startCountdown();
+        startBackgroundMusic();
+        showFunnyMessage();
       } else {
         errorMsg.style.display = 'block';
         input.classList.add('shake');
@@ -390,6 +714,58 @@
 
     document.getElementById('password-input').addEventListener('keyup', function(event) {
       if (event.key === 'Enter') checkPassword();
+    });
+
+    /* ---------- Funny pre-countdown message ---------- */
+
+    const funnyLines = [
+      "Loading 45 years of wisdom... and dad jokes 😄",
+      "Warning: extreme cuteness (and cake) ahead 🎂",
+      "Pappa Mode: Legendary Edition — now unlocking...",
+      "Fetching hugs, jokes, and cake... please wait 🎉",
+      "Caution: may cause spontaneous smiling 😁",
+      "Initiating birthday sequence... resistance is futile 🥳"
+    ];
+
+    function showFunnyMessage() {
+      const screen = document.getElementById('funny-screen');
+      const textEl = document.getElementById('funny-text');
+
+      textEl.textContent = funnyLines[Math.floor(Math.random() * funnyLines.length)];
+      screen.style.display = 'flex';
+
+      setTimeout(() => {
+        screen.style.display = 'none';
+        startCountdown();
+      }, 2600);
+    }
+
+    /* ---------- Background music ---------- */
+
+    function startBackgroundMusic() {
+      const music = document.getElementById('bg-music');
+      const toggleBtn = document.getElementById('music-toggle');
+
+      music.volume = 0.35;
+      music.play().catch(() => {
+        // Autoplay might be blocked by the browser; the toggle button still lets them start it manually
+      });
+
+      toggleBtn.classList.add('show');
+      toggleBtn.textContent = '🔊';
+    }
+
+    document.getElementById('music-toggle').addEventListener('click', () => {
+      const music = document.getElementById('bg-music');
+      const toggleBtn = document.getElementById('music-toggle');
+
+      if (music.paused) {
+        music.play();
+        toggleBtn.textContent = '🔊';
+      } else {
+        music.pause();
+        toggleBtn.textContent = '🔇';
+      }
     });
 
     function startCountdown() {
@@ -440,8 +816,174 @@
 
       setTimeout(() => {
         wishMsg.classList.add('show');
+        launchConfetti();
       }, flames.length * 300 + 500);
     }
+
+    /* ---------- Confetti burst ---------- */
+
+    function launchConfetti() {
+      const colors = ['#a8552f', '#e8746b', '#f2994a', '#6e7f5c', '#c08a34', '#ffd166', '#fdf6ec'];
+      const container = document.getElementById('confetti-container');
+      const count = 90;
+
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+
+        const size = 6 + Math.random() * 6;
+        piece.style.width = size + 'px';
+        piece.style.height = size + 'px';
+        piece.style.left = (Math.random() * 100) + 'vw';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        piece.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+        piece.style.animationDelay = (Math.random() * 0.4) + 's';
+
+        container.appendChild(piece);
+        setTimeout(() => piece.remove(), 5200);
+      }
+    }
+
+    /* ---------- Lightbox ---------- */
+
+    (function initLightbox() {
+      const overlay = document.getElementById('lightbox-overlay');
+      const lightboxImg = document.getElementById('lightbox-img');
+
+      function openLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || '';
+        overlay.classList.add('show');
+      }
+
+      function closeLightbox() {
+        overlay.classList.remove('show');
+      }
+
+      document.querySelectorAll('.side-photo').forEach(img => {
+        img.addEventListener('click', () => openLightbox(img.src, img.alt));
+      });
+
+      overlay.addEventListener('click', closeLightbox);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+      });
+    })();
+
+    /* ---------- Swipe-to-reveal gift box ---------- */
+
+    (function initGiftBox() {
+      const box = document.getElementById('gift-box');
+      const cakeWrap = document.getElementById('cake-wrap');
+
+      let dragging = false;
+      let revealed = false;
+      let startX = 0;
+      let currentX = 0;
+
+      const MAX_DRAG = 220;   // px of drag needed to fully clear the box
+      const THRESHOLD = 110;  // px of drag needed to count as a successful swipe
+
+      function getX(e) {
+        return e.touches ? e.touches[0].clientX : e.clientX;
+      }
+
+      function onDragStart(e) {
+        if (revealed) return;
+        dragging = true;
+        startX = getX(e);
+        box.classList.add('dragging');
+      }
+
+      function onDragMove(e) {
+        if (!dragging || revealed) return;
+        const x = getX(e);
+        let delta = x - startX;
+        if (delta < 0) delta = 0;
+        if (delta > MAX_DRAG) delta = MAX_DRAG;
+        currentX = delta;
+
+        const progress = delta / MAX_DRAG;
+        box.style.transform = `translateX(${delta}px) scale(${1 - progress * 0.15})`;
+        box.style.opacity = String(1 - progress * 0.7);
+      }
+
+      function onDragEnd() {
+        if (!dragging || revealed) return;
+        dragging = false;
+        box.classList.remove('dragging');
+
+        if (currentX >= THRESHOLD) {
+          revealCake();
+        } else {
+          box.style.transform = 'translateX(0) scale(1)';
+          box.style.opacity = '1';
+        }
+        currentX = 0;
+      }
+
+      function revealCake() {
+        revealed = true;
+        box.style.transform = 'translateX(340px) scale(0.7)';
+        box.style.opacity = '0';
+
+        setTimeout(() => {
+          box.style.display = 'none';
+          cakeWrap.style.display = 'flex';
+          cakeWrap.classList.add('show');
+        }, 450);
+      }
+
+      // Mouse events
+      box.addEventListener('mousedown', onDragStart);
+      window.addEventListener('mousemove', onDragMove);
+      window.addEventListener('mouseup', onDragEnd);
+
+      // Touch events
+      box.addEventListener('touchstart', onDragStart, { passive: true });
+      box.addEventListener('touchmove', onDragMove, { passive: true });
+      box.addEventListener('touchend', onDragEnd);
+    })();
+
+    /* ---------- Scroll-down hint ---------- */
+
+    (function initScrollHint() {
+      const hint = document.getElementById('scroll-hint');
+      const messageEl = document.querySelector('.message');
+      const birthdayPage = document.getElementById('birthday-page');
+
+      function checkVisibility() {
+        if (birthdayPage.style.display !== 'block') {
+          hint.classList.remove('show');
+          return;
+        }
+        const rect = messageEl.getBoundingClientRect();
+        const messageVisible = rect.top < window.innerHeight * 0.85;
+        if (messageVisible) {
+          hint.classList.remove('show');
+        } else {
+          hint.classList.add('show');
+        }
+      }
+
+      window.addEventListener('scroll', checkVisibility);
+      window.addEventListener('resize', checkVisibility);
+
+      hint.addEventListener('click', () => {
+        messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
+      // birthday-page only becomes visible after the countdown finishes,
+      // so poll briefly until it does, then hand off to the scroll listener
+      const waitForPage = setInterval(() => {
+        if (birthdayPage.style.display === 'block') {
+          clearInterval(waitForPage);
+          checkVisibility();
+        }
+      }, 300);
+    })();
   </script>
 
 </body>
