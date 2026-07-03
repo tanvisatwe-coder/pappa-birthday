@@ -17,12 +17,50 @@
     }
 
     #login-screen {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #glasses-screen {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      text-align: center;
+      padding: 0 30px;
     }
+
+    .glasses-icon {
+      font-size: 4.5rem;
+      margin-bottom: 16px;
+      animation: pop 1s ease;
+    }
+
+    .glasses-text {
+      font-size: 1.4rem;
+      color: #a8552f;
+      font-weight: bold;
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    #glasses-continue-btn {
+      font-family: Georgia, serif;
+      font-size: 1.1rem;
+      background-color: #a8552f;
+      color: #fdf6ec;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #glasses-continue-btn:hover { background-color: #8a431f; }
 
     .lock-icon { font-size: 4rem; margin-bottom: 10px; }
     #login-screen h2 { font-size: 1.8rem; color: #a8552f; margin-bottom: 5px; }
@@ -594,9 +632,80 @@
     .music-toggle:hover {
       transform: scale(1.08);
     }
+
+    /* ---------- Print / Save button ---------- */
+
+    .print-btn {
+      position: fixed;
+      top: 20px;
+      right: 28px;
+      width: 46px;
+      height: 46px;
+      background: #a8552f;
+      color: #fdf6ec;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.2s ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      z-index: 1100;
+    }
+
+    .print-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .print-btn:hover {
+      transform: scale(1.08);
+    }
+
+    /* ---------- Print styles ---------- */
+
+    @media print {
+      .music-toggle,
+      .print-btn,
+      .scroll-hint,
+      #confetti-container,
+      .lightbox-overlay,
+      .gift-box,
+      .blow-hint,
+      #glasses-screen,
+      #login-screen {
+        display: none !important;
+      }
+
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .cake-wrap {
+        display: flex !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .side-photo {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+      }
+    }
   </style>
 </head>
 <body>
+
+  <div id="glasses-screen">
+    <div class="glasses-icon">🕶️</div>
+    <p class="glasses-text">Before we begin, Pappa... please put on your glasses and take a comfy seat! 😄</p>
+    <button id="glasses-continue-btn" onclick="showLoginScreen()">I'm Ready!</button>
+  </div>
 
   <div id="login-screen">
     <div class="lock-icon">🔒</div>
@@ -692,10 +801,16 @@
     Scroll down for a message <span class="scroll-hint-arrow">⬇</span>
   </div>
 
-  <audio id="bg-music" src="audio/bg-music.mp3" loop preload="auto"></audio>
+  <audio id="bg-music" src="audio/audio/bg-music.mp3" loop preload="auto"></audio>
   <div class="music-toggle" id="music-toggle">🔊</div>
+  <div class="print-btn" id="print-btn" title="Save / Print">🖨️</div>
 
   <script>
+    function showLoginScreen() {
+      document.getElementById('glasses-screen').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+
     function checkPassword() {
       const input = document.getElementById('password-input');
       const errorMsg = document.getElementById('error-msg');
@@ -746,21 +861,29 @@
       const music = document.getElementById('bg-music');
       const toggleBtn = document.getElementById('music-toggle');
 
-      music.volume = 0.35;
-      music.play().catch(() => {
-        // Autoplay might be blocked by the browser; the toggle button still lets them start it manually
-      });
+      music.volume = 0.5;
+      music.play()
+        .then(() => {
+          console.log('Music started playing successfully.');
+        })
+        .catch((err) => {
+          console.warn('Music could not autoplay. Tap the speaker icon to start it manually.', err);
+        });
 
       toggleBtn.classList.add('show');
       toggleBtn.textContent = '🔊';
     }
+
+    document.getElementById('bg-music').addEventListener('error', () => {
+      console.error('bg-music.mp3 could not be loaded. Check that the file exists at audio/audio/bg-music.mp3 next to index.html, and that the filename matches exactly (including .mp3).');
+    });
 
     document.getElementById('music-toggle').addEventListener('click', () => {
       const music = document.getElementById('bg-music');
       const toggleBtn = document.getElementById('music-toggle');
 
       if (music.paused) {
-        music.play();
+        music.play().catch((err) => console.warn('Playback failed:', err));
         toggleBtn.textContent = '🔊';
       } else {
         music.pause();
@@ -782,6 +905,7 @@
           clearInterval(interval);
           countdownScreen.style.display = 'none';
           document.getElementById('birthday-page').style.display = 'block';
+          document.getElementById('print-btn').classList.add('show');
         } else {
           numberEl.style.animation = 'none';
           numberEl.textContent = count;
@@ -984,6 +1108,12 @@
         }
       }, 300);
     })();
+
+    /* ---------- Print / Save ---------- */
+
+    document.getElementById('print-btn').addEventListener('click', () => {
+      window.print();
+    });
   </script>
 
 </body>
