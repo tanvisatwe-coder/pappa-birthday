@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Happy Birthday, Pappa</title>
 
   <style>
@@ -455,12 +456,6 @@
       border-radius: 8px;
     }
 
-    @media (max-width: 720px) {
-      .side-photo { width: 80px; height: 80px; }
-      .gift-box { width: 210px; height: 250px; }
-      .gift-emoji { font-size: 2.6rem; }
-    }
-
     /* ---------- Lightbox ---------- */
 
     .lightbox-overlay {
@@ -663,6 +658,52 @@
 
     .print-btn:hover {
       transform: scale(1.08);
+    }
+
+    /* ---------- Responsive layout ---------- */
+
+    @media (max-width: 720px) {
+      body { padding: 24px 12px; }
+
+      h1 { font-size: 2.1rem; }
+      .subtitle { font-size: 0.95rem; margin-bottom: 20px; }
+
+      .glasses-icon { font-size: 3.4rem; }
+      .glasses-text { font-size: 1.1rem; max-width: 90vw; }
+
+      .funny-emoji { font-size: 3rem; }
+      .funny-text { font-size: 1.2rem; max-width: 90vw; }
+
+      .photo-stage { gap: 16px; }
+      .side-photo { width: 78px; height: 78px; }
+
+      .gift-box { width: 200px; height: 240px; }
+      .gift-emoji { font-size: 2.4rem; }
+      .swipe-pill { font-size: 0.85rem; padding: 6px 14px; }
+
+      .cake-tier-top { width: 150px; height: 50px; font-size: 1.4rem; }
+      .cake-tier-bottom { width: 200px; height: 46px; }
+      .plate { width: 240px; }
+      .cake-caption { font-size: 1.2rem; }
+
+      .message { font-size: 1.05rem; padding: 20px; margin: 16px auto 32px; }
+
+      #password-input { width: 130px; font-size: 1.1rem; }
+      #unlock-btn { padding: 12px 20px; font-size: 1rem; }
+
+      .music-toggle,
+      .print-btn { width: 40px; height: 40px; font-size: 1.1rem; }
+
+      .scroll-hint { font-size: 0.85rem; padding: 8px 16px; bottom: 18px; }
+    }
+
+    @media (max-width: 400px) {
+      h1 { font-size: 1.7rem; }
+      .side-photo { width: 64px; height: 64px; }
+      .gift-box { width: 170px; height: 210px; }
+      .cake-tier-top { width: 130px; height: 44px; font-size: 1.2rem; }
+      .cake-tier-bottom { width: 170px; height: 40px; }
+      .plate { width: 200px; }
     }
 
     /* ---------- Print styles ---------- */
