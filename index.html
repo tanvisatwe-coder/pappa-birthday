@@ -660,6 +660,52 @@
       transform: scale(1.08);
     }
 
+    /* ---------- Years counter ---------- */
+
+    .years-counter {
+      max-width: 600px;
+      margin: 0 auto 20px;
+      background: #f3e8d6;
+      border: 2px solid #a8552f;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+
+    .years-counter-label {
+      font-size: 1rem;
+      color: #6b5a48;
+      font-style: italic;
+      margin: 0 0 10px;
+    }
+
+    .years-counter-value {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .years-counter-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 90px;
+    }
+
+    .years-counter-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #a8552f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .years-counter-tag {
+      font-size: 0.75rem;
+      color: #a8916f;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
     /* ---------- Responsive layout ---------- */
 
     @media (max-width: 720px) {
@@ -695,6 +741,10 @@
       .print-btn { width: 40px; height: 40px; font-size: 1.1rem; }
 
       .scroll-hint { font-size: 0.85rem; padding: 8px 16px; bottom: 18px; }
+
+      .years-counter { padding: 16px 18px; margin: 0 auto 16px; }
+      .years-counter-number { font-size: 1.15rem; }
+      .years-counter-unit { min-width: 70px; }
     }
 
     @media (max-width: 400px) {
@@ -704,6 +754,10 @@
       .cake-tier-top { width: 130px; height: 44px; font-size: 1.2rem; }
       .cake-tier-bottom { width: 170px; height: 40px; }
       .plate { width: 200px; }
+
+      .years-counter-value { gap: 8px; }
+      .years-counter-number { font-size: 0.95rem; }
+      .years-counter-unit { min-width: 56px; }
     }
 
     /* ---------- Print styles ---------- */
@@ -717,7 +771,8 @@
       .gift-box,
       .blow-hint,
       #glasses-screen,
-      #login-screen {
+      #login-screen,
+      .years-counter {
         display: none !important;
       }
 
@@ -822,6 +877,16 @@
         <img class="side-photo" src="images/photo6.jpeg" alt="Pappa memory 6">
       </div>
 
+    </div>
+
+    <div class="years-counter" id="years-counter">
+      <p class="years-counter-label">He's been amazing for a total of</p>
+      <div class="years-counter-value" id="years-counter-value">
+        <div class="years-counter-unit"><div class="years-counter-number" id="counter-years">--</div><div class="years-counter-tag">Years</div></div>
+        <div class="years-counter-unit"><div class="years-counter-number" id="counter-days">--</div><div class="years-counter-tag">Days</div></div>
+        <div class="years-counter-unit"><div class="years-counter-number" id="counter-hours">--</div><div class="years-counter-tag">Hours</div></div>
+        <div class="years-counter-unit"><div class="years-counter-number" id="counter-seconds">--</div><div class="years-counter-tag">Seconds</div></div>
+      </div>
     </div>
 
     <p class="message">
@@ -1155,6 +1220,38 @@
     document.getElementById('print-btn').addEventListener('click', () => {
       window.print();
     });
+
+    /* ---------- Live years / days / hours counter ---------- */
+
+    // TODO: change this to Pappa's actual birth date and time.
+    // Format: 'YYYY-MM-DDTHH:MM:SS' (24-hour time). If you don't know the
+    // exact time of day, midnight (T00:00:00) is a fine default.
+    const BIRTH_DATE = new Date('1981-07-06T00:00:00');
+
+    function updateYearsCounter() {
+      const now = new Date();
+      const diffMs = now - BIRTH_DATE;
+
+      // Total completed years (calendar-accurate)
+      let years = now.getFullYear() - BIRTH_DATE.getFullYear();
+      const hasHadBirthdayThisYear =
+        now.getMonth() > BIRTH_DATE.getMonth() ||
+        (now.getMonth() === BIRTH_DATE.getMonth() && now.getDate() >= BIRTH_DATE.getDate());
+      if (!hasHadBirthdayThisYear) years--;
+
+      // Independent running totals since birth
+      const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const totalSeconds = Math.floor(diffMs / 1000);
+
+      document.getElementById('counter-years').textContent = years.toLocaleString();
+      document.getElementById('counter-days').textContent = totalDays.toLocaleString();
+      document.getElementById('counter-hours').textContent = totalHours.toLocaleString();
+      document.getElementById('counter-seconds').textContent = totalSeconds.toLocaleString();
+    }
+
+    updateYearsCounter();
+    setInterval(updateYearsCounter, 1000);
   </script>
 
 </body>
